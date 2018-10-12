@@ -6,6 +6,10 @@ if [[ "$SHOULD_BUILD" == "yes" ]]; then
 
   if [[ "$BUILDARCH" == "ia32" ]]; then
     export npm_config_arch=ia32
+  elif [[ "$BUILDARCH" == "arm64" ]]; then
+    export VSCODE_ELECTRON_PLATFORM=arm64
+    export npm_config_arch=arm64
+    export npm_config_target_arch=arm64
   fi
 
   yarn
@@ -35,6 +39,9 @@ if [[ "$SHOULD_BUILD" == "yes" ]]; then
     npm run gulp vscode-linux-arm64-min
     npm run gulp vscode-linux-arm64-build-deb
     # npm run gulp vscode-linux-arm64-build-rpm
+    unset npm_config_arch
+    unset npm_config_target_arch
+    unset VSCODE_ELECTRON_PLATFORM
   else
     npm run gulp vscode-linux-x64-min
     npm run gulp vscode-linux-x64-build-deb
