@@ -13,22 +13,5 @@ else
     sudo apt-get update
     sudo apt-get install libc6-dev-i386 gcc-multilib g++-multilib
     sudo apt-get install libx11-dev:i386 libxkbfile-dev:i386
-  elif [[ $BUILDARCH == "arm64" ]]; then
-    echo "Setting up env for arm64"
-    deps="libx11-dev libxkbfile-dev libsecret-1-dev"
-    lib_path=/usr/lib/aarch64-linux-gnu
-    linkage_list="-L $lib_path -I/usr/include/aarch64-linux-gnu"
-    for package in $deps; do
-      linkage_list="$linkage_list -I/usr/lib/aarch64-linux-gnu/$package/include"
-    done
-    export CC="aarch64-linux-gnu-gcc $linkage_list"
-    export CXX="aarch64-linux-gnu-g++ $linkage_list"
-    sudo dpkg --add-architecture arm64
-    ./arm_sources.sh
-    sudo apt-get update
-    sudo apt-get install libx11-dev:arm64 libxkbfile-dev:arm64 libsecret-1-dev:arm64
-    echo "Symlinking libxkbfile.so"
-    rm -rf /usr/lib/libxkbfile.so
-    sudo ln -s /usr/lib/aarch64-linux-gnu/libxkbfile.so /usr/lib/libxkbfile.so
   fi
 fi
