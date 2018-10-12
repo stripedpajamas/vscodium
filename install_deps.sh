@@ -26,7 +26,9 @@ else
     sudo dpkg --add-architecture arm64
     ./arm_sources.sh
     sudo apt-get update
-    sudo apt-get install dpkg-cross
-    sudo apt-get install libx11-dev:arm64 libxkbfile-dev:arm64 libsecret-1-dev:arm64
+    sudo apt-get install dpkg-cross:arm64 libx11-dev:arm64 libxkbfile-dev:arm64 libsecret-1-dev:arm64
+    echo "Symlinking libxkbfile.so"
+    rm -rf /usr/lib/libxkbfile.so
+    ln -s /usr/lib/aarch64-linux-gnu/libxkbfile.so /usr/lib/libxkbfile.so
   fi
 fi
