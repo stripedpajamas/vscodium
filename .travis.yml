@@ -9,6 +9,7 @@ matrix:
 #      sudo: required
 #      env: BUILDARCH=arm64
     - os: osx
+    - os: windows
 
 language: node_js
 node_js: "8"
@@ -39,6 +40,10 @@ deploy:
     - vscode/.build/linux/deb/amd64/deb/*.deb
     - vscode/.build/linux/rpm/x86_64/*.rpm
     - vscode/.build/linux/deb/arm64/deb/*.deb
+    - vscode/.build/win32-x64/system-setup/*.exe
+    - vscode/.build/win32-x64/user-setup/*.exe
+    - vscode/.build/win32-x64/archive/*.zip
+
   on:
     all_branches: true
     condition: $SHOULD_BUILD = yes
