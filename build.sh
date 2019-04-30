@@ -37,6 +37,7 @@ if [[ "$SHOULD_BUILD" == "yes" ]]; then
     npm run gulp -- "vscode-linux-${BUILDARCH}-build-deb"
     npm run gulp -- "vscode-linux-${BUILDARCH}-build-rpm"
     . ../create_appimage.sh
+    . ../create_snap.sh
   fi
 
   cd ..
