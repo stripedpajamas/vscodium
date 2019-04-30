@@ -3,6 +3,7 @@ matrix:
     - os: linux
       sudo: required
       env: BUILDARCH=x64
+      dist: xenial
     - os: linux
       sudo: required
       env: BUILDARCH=ia32
