@@ -2,6 +2,7 @@
 
 if [[ "$BUILDARCH" == "x64" ]]; then
   set -ex
+  sudo snap install snapcraft --classic
   snapcraft --version
   sudo apt-get upgrade -y
   REPO="$(pwd)"
