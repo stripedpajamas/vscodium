@@ -1,6 +1,8 @@
 #!/bin/bash
 
-if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
+if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  brew install jq
+else
   sudo apt-get update
   sudo apt-get install -y fakeroot rpm
   if [[ $BUILDARCH == "arm64" ]]; then
