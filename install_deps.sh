@@ -1,11 +1,8 @@
 #!/bin/bash
 
-if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-  brew update
-  brew install jq zip
-else
+if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
   sudo apt-get update
-  sudo apt-get install -y fakeroot rpm jq
+  sudo apt-get install -y fakeroot rpm
   if [[ $BUILDARCH == "arm64" ]]; then
     echo "deb http://ports.ubuntu.com/ubuntu-ports/ trusty main" | sudo tee -a /etc/apt/sources.list.d/arm64.list >/dev/null
     sudo dpkg --add-architecture arm64
@@ -17,6 +14,6 @@ else
     export CC_host=/usr/bin/gcc
     export CXX_host=/usr/bin/g++
   else
-    sudo apt-get install libx11-dev libxkbfile-dev libsecret-1-dev fakeroot rpm jq
+    sudo apt-get install libx11-dev libxkbfile-dev libsecret-1-dev fakeroot rpm
   fi
 fi
