@@ -15,7 +15,7 @@ matrix:
     - os: osx
 
 language: node_js
-node_js: "10"
+node_js: "12"
 
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
@@ -48,6 +48,7 @@ deploy:
     - ./*.deb
     - ./*.rpm
     - ./*.AppImage
+    - ./*.AppImage.zsync
   on:
     all_branches: true
     condition: $SHOULD_BUILD = yes
