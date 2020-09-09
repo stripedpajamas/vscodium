@@ -32,15 +32,41 @@ _(For example the C# extension `ms-vscode.csharp` sends tracking data to Microso
 
 ## <a id="extensions-marketplace"></a>Extensions + Marketplace
 
-Until something more open comes around, we use the Microsoft Marketplace/Extensions in the `product.json` file. Those links are licensed under MIT as per [the comments on this issue.](https://github.com/Microsoft/vscode/issues/31168#issuecomment-317319063)
+The `product.json` file is set up to use [open-vsx.org](https://open-vsx.org/) as extension gallery, which has an [adapter](https://github.com/eclipse/openvsx/wiki/Using-Open-VSX-in-VS-Code) to the Marketplace API used by VS Code. Since that is a rather new project, you will likely miss some extensions you know from the VS Code Marketplace. You have the following options to obtain such missing extensions:
 
-If you use the [code-settings-sync](https://github.com/shanalikhan/code-settings-sync) extension, you may have [an issue](https://github.com/VSCodium/vscodium/issues/72) installing extensions (via the plugin). Refer to [this workaround](https://github.com/shanalikhan/code-settings-sync/issues/668#issuecomment-462065341) to get it working properly.
+ * Ask the extension maintainers to publish to [open-vsx.org](https://open-vsx.org/) in addition to the VS Code Marketplace. The publishing process is documented in the [Open VSX Wiki](https://github.com/eclipse/openvsx/wiki/Publishing-Extensions).
+ * Create a pull request to [this repository](https://github.com/open-vsx/publish-extensions) to have the [@open-vsx](https://github.com/open-vsx) service account publish the extensions for you.
+ * Download and [install the vsix files](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix).
+ * Modify the `extensionsGallery` section of the `product.json` file in your VSCodium installation to use the VS Code Marketplace as shown below. However, note that [it is not clear whether this is legal](https://github.com/microsoft/vscode/issues/31168).
+```
+"extensionsGallery": {
+    "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
+    "itemUrl": "https://marketplace.visualstudio.com/items"
+}
+```
+
+See [this article](https://www.gitpod.io/blog/open-vsx/) for more information on the motivation behind Open VSX.
 
 ### Proprietary Debugging Tools
 
 The debugger provided with Microsoft's [C# extension](https://github.com/OmniSharp/omnisharp-vscode) as well as the (Windows) debugger provided with their [C++ extension](https://github.com/Microsoft/vscode-cpptools) are very restrictively licensed to only work with the offical Visual Studio Code build. See [this comment in the C# extension repo](https://github.com/OmniSharp/omnisharp-vscode/issues/2491#issuecomment-418811364) and [this comment in the C++ extension repo](https://github.com/Microsoft/vscode-cpptools/issues/21#issuecomment-248349017).
 
 A workaround exists to get debugging working in C# projects, by using Samsung's opensource [netcoredbg](https://github.com/Samsung/netcoredbg) package. See [this comment](https://github.com/VSCodium/vscodium/issues/82#issue-409806641) for instructions on how to set that up.
+
+### Proprietary Extensions
+
+Like the debuggers mentioned above, some extensions you may find in the marketplace (like the [Remote Development Extensions](https://code.visualstudio.com/docs/remote/remote-overview)) only function the offical Visual Studio Code build. You can work around this by adding the extension's internal ID (found on the extension's page) to the `extensionAllowedProposedApi` property of the product.json in your VSCodium installation. For example:
+
+```json
+  "extensionAllowedProposedApi": [
+    // ...
+    "ms-vscode-remote.vscode-remote-extensionpack",
+    "ms-vscode-remote.remote-wsl",
+    // ...
+  ],
+```
+
+In some cases, the above change won't help because the extension is hard-coded to only work with the official Visual Studio Code product.
 
 ## <a id="migrating"></a>Migrating from Visual Studio Code to VSCodium
 
@@ -65,9 +91,9 @@ To copy your settings manually:
 - Copy the contents of settings.json into the same place in VSCodium
 
 ## <a id="portable"></a>How do I run VSCodium in portable mode?
-You can follow the [Portable Mode instructions](https://code.visualstudio.com/docs/editor/portable) from the Visual Studio Code website. For Windows and Linux the instructions can be followed as written. For Mac OS, portable mode is enabled by the existence of a specially named folder. For Visual Studio Code that folder name is `code-portable-data`. For VSCodium, that folder name is `codium-portable-data`. 
-
-So to enable portable mode for VSCodium on Mac OS, follow the instructions outlined in the link above, but create a folder named `codium-portable-data` instead of `code-portable-data`.
+You can follow the [Portable Mode instructions](https://code.visualstudio.com/docs/editor/portable) from the Visual Studio Code website. 
+- **Windows** / **Linux** : the instructions can be followed as written.
+- **macOS** : portable mode is enabled by the existence of a specially named folder. For Visual Studio Code that folder name is `code-portable-data`. For VSCodium, that folder name is `codium-portable-data`. So to enable portable mode for VSCodium on Mac OS, follow the instructions outlined in the [link above](https://code.visualstudio.com/docs/editor/portable), but create a folder named `codium-portable-data` instead of `code-portable-data`.
 
 ## <a id="press-and-hold"></a>How do I press and hold a key and have it repeat in VSCodium (Mac)?
 
