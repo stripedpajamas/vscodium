@@ -1,78 +1,42 @@
 #!/bin/bash
 
-function keep_alive_small() {
-  while true; do
-    echo .
-    read -t 60 < /proc/self/fd/1 > /dev/null 2>&1
-  done
-}
-
-function keep_alive() {
-  while true; do
-    date
-    sleep 60
-  done
-}
+set -ex
 
 if [[ "$SHOULD_BUILD" == "yes" ]]; then
-  export BUILD_SOURCEVERSION=$LATEST_MS_COMMIT
+  npm config set scripts-prepend-node-path true
+
   echo "LATEST_MS_COMMIT: ${LATEST_MS_COMMIT}"
-  echo "BUILD_SOURCEVERSION: ${BUILD_SOURCEVERSION}"
 
-  export npm_config_arch="$BUILDARCH"
-  export npm_config_target_arch="$BUILDARCH"
-
-  ./prepare_vscode.sh
+  . prepare_vscode.sh
 
   cd vscode || exit
 
-  export NODE_ENV=production
-
-  # these tasks are very slow, so using a keep alive to keep travis alive
-  if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    keep_alive_small &
-  else
-    keep_alive &
-  fi
-
-  KA_PID=$!
+  yarn monaco-compile-check
+  yarn valid-layers-check
 
   yarn gulp compile-build
+  yarn gulp compile-extension-media
   yarn gulp compile-extensions-build
-
   yarn gulp minify-vscode
 
-  yarn gulp minify-vscode-reh
-  yarn gulp minify-vscode-reh-web
-
-  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    npm install --global create-dmg
-    yarn gulp vscode-darwin-min-ci
-    yarn gulp vscode-reh-darwin-min-ci
-    yarn gulp vscode-reh-web-darwin-min-ci
-  elif [[ "$CI_WINDOWS" == "True" ]]; then
+  if [[ "$OS_NAME" == "osx" ]]; then
+    yarn gulp "vscode-darwin-${VSCODE_ARCH}-min-ci"
+  elif [[ "$OS_NAME" == "windows" ]]; then
     cp LICENSE.txt LICENSE.rtf # windows build expects rtf license
-    yarn gulp "vscode-win32-${BUILDARCH}-min-ci"
-    yarn gulp "vscode-reh-win32-${BUILDARCH}-min-ci"
-    yarn gulp "vscode-reh-web-win32-${BUILDARCH}-min-ci"
-    yarn gulp "vscode-win32-${BUILDARCH}-code-helper"
-    yarn gulp "vscode-win32-${BUILDARCH}-inno-updater"
-    yarn gulp "vscode-win32-${BUILDARCH}-archive"
-    yarn gulp "vscode-win32-${BUILDARCH}-system-setup"
-    yarn gulp "vscode-win32-${BUILDARCH}-user-setup"
+    yarn gulp "vscode-win32-${VSCODE_ARCH}-min-ci"
+    yarn gulp "vscode-win32-${VSCODE_ARCH}-code-helper"
+    yarn gulp "vscode-win32-${VSCODE_ARCH}-inno-updater"
+    yarn gulp "vscode-win32-${VSCODE_ARCH}-archive"
+    yarn gulp "vscode-win32-${VSCODE_ARCH}-system-setup"
+    yarn gulp "vscode-win32-${VSCODE_ARCH}-user-setup"
   else # linux
-    yarn gulp vscode-linux-${BUILDARCH}-min-ci
-    yarn gulp vscode-reh-linux-${BUILDARCH}-min-ci
-    yarn gulp vscode-reh-web-linux-${BUILDARCH}-min-ci
-
-    yarn gulp "vscode-linux-${BUILDARCH}-build-deb"
-    if [[ "$BUILDARCH" == "x64" ]]; then
-      yarn gulp "vscode-linux-${BUILDARCH}-build-rpm"
+    yarn gulp "vscode-linux-${VSCODE_ARCH}-min-ci"
+    if [[ "$SKIP_LINUX_PACKAGES" != "True" ]]; then
+      yarn gulp "vscode-linux-${VSCODE_ARCH}-build-deb"
+      yarn gulp "vscode-linux-${VSCODE_ARCH}-build-rpm"
+      . ../create_appimage.sh
     fi
-    . ../create_appimage.sh
   fi
-
-  kill $KA_PID
 
   cd ..
 fi

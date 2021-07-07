@@ -27,15 +27,8 @@ fi
 URL_BASE=https://github.com/VSCodium/vscodium/releases/download/${LATEST_MS_TAG}
 
 # to make testing on forks easier
-if [[ "$CI_WINDOWS" == "True" ]]; then
-  # BUILD_REPOSITORY_URI = e.g. https://github.com/VSCodium/vscodium
-  VERSIONS_REPO=$(echo ${BUILD_REPOSITORY_URI} | awk -F"/" '{ print $4 }')/versions
-
-  git config --global core.autocrlf true
-else
-  # TRAVIS_REPO_SLUG = e.g. VSCodium/vscodium
-  VERSIONS_REPO=$(echo ${TRAVIS_REPO_SLUG} | awk -F"/" '{ print $1 }')/versions
-fi
+VERSIONS_REPO="${GITHUB_USERNAME}/versions"
+echo "Versions repo:" $VERSIONS_REPO
 
 # generateJson <assetName>
 # e.g. generateJson VSCodium-darwin-1.33.0.zip
@@ -98,36 +91,36 @@ git remote rm origin
 git remote add origin https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${VERSIONS_REPO}.git > /dev/null 2>&1
 cd ..
 
-if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+if [[ "$OS_NAME" == "osx" ]]; then
   # zip, sha1, and sha256 files are all at top level dir
-  ASSET_NAME=VSCodium-darwin-${LATEST_MS_TAG}.zip
-  VERSION_PATH="darwin"
+  ASSET_NAME=VSCodium-darwin-${VSCODE_ARCH}-${LATEST_MS_TAG}.zip
+  VERSION_PATH="darwin/${VSCODE_ARCH}"
   JSON="$(generateJson ${ASSET_NAME})"
   updateLatestVersion "$VERSION_PATH" "$JSON"
-elif [[ "$CI_WINDOWS" == "True" ]]; then
+elif [[ "$OS_NAME" == "windows" ]]; then
   # system installer
-  ASSET_NAME=VSCodiumSetup-${BUILDARCH}-${LATEST_MS_TAG}.exe
-  VERSION_PATH="win32/${BUILDARCH}/system"
+  ASSET_NAME=VSCodiumSetup-${VSCODE_ARCH}-${LATEST_MS_TAG}.exe
+  VERSION_PATH="win32/${VSCODE_ARCH}/system"
   JSON="$(generateJson ${ASSET_NAME})"
   updateLatestVersion "$VERSION_PATH" "$JSON"
 
   # user installer
-  ASSET_NAME=VSCodiumUserSetup-${BUILDARCH}-${LATEST_MS_TAG}.exe
-  VERSION_PATH="win32/${BUILDARCH}/user"
+  ASSET_NAME=VSCodiumUserSetup-${VSCODE_ARCH}-${LATEST_MS_TAG}.exe
+  VERSION_PATH="win32/${VSCODE_ARCH}/user"
   JSON="$(generateJson ${ASSET_NAME})"
   updateLatestVersion "$VERSION_PATH" "$JSON"
 
   # windows archive
-  ASSET_NAME=VSCodium-win32-${BUILDARCH}-${LATEST_MS_TAG}.zip
-  VERSION_PATH="win32/${BUILDARCH}/archive"
+  ASSET_NAME=VSCodium-win32-${VSCODE_ARCH}-${LATEST_MS_TAG}.zip
+  VERSION_PATH="win32/${VSCODE_ARCH}/archive"
   JSON="$(generateJson ${ASSET_NAME})"
   updateLatestVersion "$VERSION_PATH" "$JSON"
 else # linux
   # update service links to tar.gz file
   # see https://update.code.visualstudio.com/api/update/linux-x64/stable/VERSION
   # as examples
-  ASSET_NAME=VSCodium-linux-${BUILDARCH}-${LATEST_MS_TAG}.tar.gz
-  VERSION_PATH="linux/${BUILDARCH}"
+  ASSET_NAME=VSCodium-linux-${VSCODE_ARCH}-${LATEST_MS_TAG}.tar.gz
+  VERSION_PATH="linux/${VSCODE_ARCH}"
   JSON="$(generateJson ${ASSET_NAME})"
   updateLatestVersion "$VERSION_PATH" "$JSON"
 fi
@@ -137,7 +130,7 @@ cd versions
 git pull origin master # in case another build just pushed
 git add .
 dateAndMonth=`date "+%D %T"`
-git commit -m "Travis update: $dateAndMonth (Build $TRAVIS_BUILD_NUMBER)"
+git commit -m "CI update: $dateAndMonth (Build $GITHUB_RUN_NUMBER)"
 if ! git push origin master --quiet; then
   git pull origin master
   git push origin master --quiet
